@@ -1,55 +1,171 @@
 <UserControl x:Class="DroidBox.Desktop.Views.DashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             AllowDrop="True"
+             Drop="DashboardView_Drop"
+             DragOver="DashboardView_DragOver">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24">
-            <TextBlock Text="Dashboard" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,16" />
+            <!-- Header -->
+            <Grid Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="DroidBox Dashboard" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" />
+                    <TextBlock Text="Your Lightweight Official Android Testing Environment" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,4,0,0" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="Quick Install APK" Command="{Binding QuickInstallApkCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" />
+            </Grid>
 
-            <!-- Stats Row -->
+            <!-- First-Time Setup Wizard Card (Shown when setup is needed or in progress) -->
+            <Border Margin="0,0,0,24" BorderBrush="#0078D4" BorderThickness="1" Background="#F0F8FF">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSetupNeeded}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Official Google Android Setup Wizard" FontSize="18" FontWeight="Bold" Foreground="#004578" />
+                            <TextBlock Text="Download and configure official Google Android development tools in one click." FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,2,0,0" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="Setup Android Environment" Command="{Binding RunSetupCommand}" Style="{StaticResource PrimaryButton}" />
+                    </Grid>
+
+                    <!-- Checklist -->
+                    <Grid Margin="0,8,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="• Android SDK: Check in progress" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,2" />
+                            <TextBlock Text="• Official Android Emulator: Check in progress" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,2" />
+                            <TextBlock Text="• Virtualization: WHPX Hypervisor" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,2" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="• DroidBox-Mobile (412x915 Portrait)" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,2" />
+                            <TextBlock Text="• DroidBox-Tablet (1280x800 Landscape)" FontSize="13" Foreground="{DynamicResource TextPrimary}" Margin="0,2" />
+                            <TextBlock Text="{Binding DiskSpaceInfo}" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,2" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- License Checkbox -->
+                    <CheckBox Content="I agree to the official Google Android SDK License Agreement" IsChecked="{Binding AcceptLicenses}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,4,0,8" />
+
+                    <!-- Progress Bar (shown when setup in progress) -->
+                    <StackPanel Margin="0,8,0,0">
+                        <ProgressBar Height="8" Minimum="0" Maximum="100" Value="{Binding SetupProgressPercentage}" Margin="0,0,0,6" />
+                        <TextBlock Text="{Binding SetupProgressMessage}" FontSize="12" Foreground="#005A9E" FontWeight="SemiBold" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Two Official Virtual Device Cards (Mobile & Tablet) -->
             <Grid Margin="0,0,0,24">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Status Card -->
-                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,8,0">
+                <!-- Device 1: Mobile (DroidBox-Mobile) -->
+                <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,10,0">
                     <StackPanel>
-                        <TextBlock Text="Emulator Status" Foreground="{DynamicResource TextSecondary}" FontSize="12" />
-                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <Ellipse Width="12" Height="12" Fill="{Binding StatusColor}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding EmulatorState}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <Button Content="Start" Command="{Binding StartEmulatorCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
-                            <Button Content="Stop" Command="{Binding StopEmulatorCommand}" Padding="12,6" />
-                        </StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Mobile Emulator" FontSize="14" Foreground="{DynamicResource TextSecondary}" />
+                                <TextBlock Text="DroidBox-Mobile" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <Border Grid.Column="1" CornerRadius="12" Padding="10,4" Background="#EAEAEA" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="10" Height="10" Fill="{Binding MobileStatusColor}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding MobileStatusText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <TextBlock Text="Resolution: 412 × 915 • Portrait • 420 DPI" Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,0,14" />
+
+                        <!-- Action Buttons -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="Start" Command="{Binding StartMobileCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,4,0" />
+                            <Button Grid.Column="1" Content="Stop" Command="{Binding StopMobileCommand}" Margin="4,0" />
+                            <Button Grid.Column="2" Content="Restart" Command="{Binding RestartMobileCommand}" Margin="4,0" />
+                            <Button Grid.Column="3" Content="Install APK" Command="{Binding InstallApkMobileCommand}" Margin="4,0,0,0" />
+                        </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- Profile Card -->
-                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="8,0">
+                <!-- Device 2: Tablet (DroidBox-Tablet) -->
+                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="10,0,0,0">
                     <StackPanel>
-                        <TextBlock Text="Active Device Profile" Foreground="{DynamicResource TextSecondary}" FontSize="12" />
-                        <TextBlock Text="{Binding ActiveProfileName}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,8,0,0" />
-                        <TextBlock Text="{Binding AndroidVersion}" Foreground="{DynamicResource TextSecondary}" FontSize="13" Margin="0,4,0,0" />
-                    </StackPanel>
-                </Border>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Tablet Emulator" FontSize="14" Foreground="{DynamicResource TextSecondary}" />
+                                <TextBlock Text="DroidBox-Tablet" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <Border Grid.Column="1" CornerRadius="12" Padding="10,4" Background="#EAEAEA" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="10" Height="10" Fill="{Binding TabletStatusColor}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding TabletStatusText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
 
-                <!-- Apps Count Card -->
-                <Border Grid.Column="2" Style="{StaticResource Card}" Margin="8,0,0,0">
-                    <StackPanel>
-                        <TextBlock Text="Installed Applications" Foreground="{DynamicResource TextSecondary}" FontSize="12" />
-                        <TextBlock Text="{Binding InstalledAppsCount}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,8,0,0" />
-                        <Button Content="Quick Install APK" Command="{Binding QuickInstallApkCommand}" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0" HorizontalAlignment="Left" />
+                        <TextBlock Text="Resolution: 1280 × 800 • Landscape • 213 DPI" Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,0,14" />
+
+                        <!-- Action Buttons -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="Start" Command="{Binding StartTabletCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,4,0" />
+                            <Button Grid.Column="1" Content="Stop" Command="{Binding StopTabletCommand}" Margin="4,0" />
+                            <Button Grid.Column="2" Content="Restart" Command="{Binding RestartTabletCommand}" Margin="4,0" />
+                            <Button Grid.Column="3" Content="Install APK" Command="{Binding InstallApkTabletCommand}" Margin="4,0,0,0" />
+                        </Grid>
                     </StackPanel>
                 </Border>
             </Grid>
 
             <!-- Status Banner -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,24" Background="#E1F0FF">
-                <TextBlock Text="{Binding StatusMessage}" Foreground="#005A9E" FontWeight="SemiBold" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#005A9E" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="Tip: Drag &amp; drop any .apk file onto this window to install &amp; test" Foreground="{DynamicResource TextSecondary}" FontSize="12" VerticalAlignment="Center" />
+                </Grid>
             </Border>
 
             <!-- Recent Applications -->

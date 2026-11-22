@@ -2,6 +2,7 @@ using DroidBox.Core.Entities;
 using DroidBox.Core.Enums;
 using DroidBox.Core.Interfaces;
 using DroidBox.Core.Models;
+using DroidBox.Shared.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace DroidBox.Application.Services;
@@ -9,12 +10,17 @@ namespace DroidBox.Application.Services;
 public class EmulatorService : IEmulatorService
 {
     private readonly IAndroidRuntime _runtime;
+    private readonly IAndroidEmulatorManager _emulatorManager;
     private readonly ILogger<EmulatorService> _logger;
     private EmulatorInstance? _currentInstance;
 
-    public EmulatorService(IAndroidRuntime runtime, ILogger<EmulatorService> logger)
+    public EmulatorService(
+        IAndroidRuntime runtime,
+        IAndroidEmulatorManager emulatorManager,
+        ILogger<EmulatorService> logger)
     {
         _runtime = runtime;
+        _emulatorManager = emulatorManager;
         _logger = logger;
     }
 
@@ -22,17 +28,24 @@ public class EmulatorService : IEmulatorService
     {
         try
         {
-            _logger.LogInformation("Starting emulator: {AvdName}", avdName ?? "default");
-            await _runtime.StartAsync(cancellationToken);
+            var targetAvd = avdName ?? SdkConstants.TabletDeviceName;
+            _logger.LogInformation("Starting emulator for AVD: {AvdName}", targetAvd);
+
+            var res = await _emulatorManager.StartEmulatorAsync(targetAvd, cancellationToken);
+            if (!res.Success)
+            {
+                // Fallback to general runtime start if emulator manager had an issue
+                await _runtime.StartAsync(cancellationToken);
+            }
 
             _currentInstance = new EmulatorInstance
             {
-                AvdName = avdName ?? "DroidBox_Default",
+                AvdName = targetAvd,
                 State = EmulatorState.Running,
                 StartedAt = DateTime.UtcNow
             };
 
-            return OperationResult.Ok("Emulator started successfully");
+            return OperationResult.Ok($"Emulator {targetAvd} started successfully.");
         }
         catch (Exception ex)
         {
@@ -46,6 +59,7 @@ public class EmulatorService : IEmulatorService
         try
         {
             _logger.LogInformation("Stopping emulator");
+            var res = await _emulatorManager.StopEmulatorAsync(null, cancellationToken);
             await _runtime.StopAsync(cancellationToken);
 
             if (_currentInstance != null)
@@ -53,7 +67,7 @@ public class EmulatorService : IEmulatorService
                 _currentInstance.State = EmulatorState.Stopped;
             }
 
-            return OperationResult.Ok("Emulator stopped successfully");
+            return res.Success ? res : OperationResult.Ok("Emulator stopped successfully");
         }
         catch (Exception ex)
         {
@@ -62,11 +76,33 @@ public class EmulatorService : IEmulatorService
         }
     }
 
+    public async Task<OperationResult> RestartAsync(string? avdName = null, CancellationToken cancellationToken = default)
+    {
+        var targetAvd = avdName ?? _currentInstance?.AvdName ?? SdkConstants.TabletDeviceName;
+        return await _emulatorManager.RestartEmulatorAsync(targetAvd, cancellationToken);
+    }
+
+    public Task<OperationResult> StartDeviceAsync(string avdName, CancellationToken cancellationToken = default)
+    {
+        return _emulatorManager.StartEmulatorAsync(avdName, cancellationToken);
+    }
+
+    public Task<OperationResult> StopDeviceAsync(string? avdName = null, CancellationToken cancellationToken = default)
+    {
+        return _emulatorManager.StopEmulatorAsync(avdName, cancellationToken);
+    }
+
+    public Task<bool> IsDeviceRunningAsync(string avdName, CancellationToken cancellationToken = default)
+    {
+        return _emulatorManager.IsRunningAsync(avdName, cancellationToken);
+    }
+
     public async Task<EmulatorState> GetStateAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _runtime.GetStateAsync(cancellationToken);
+            var isRunning = await _emulatorManager.IsRunningAsync(null, cancellationToken);
+            return isRunning ? EmulatorState.Running : await _runtime.GetStateAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -79,7 +115,7 @@ public class EmulatorService : IEmulatorService
     {
         try
         {
-            return await _runtime.IsRunningAsync(cancellationToken);
+            return await _emulatorManager.IsRunningAsync(null, cancellationToken) || await _runtime.IsRunningAsync(cancellationToken);
         }
         catch
         {

@@ -32,14 +32,25 @@ public class EmulatorProcessManager : IAndroidRuntime
             _state = EmulatorState.Error;
             throw new FileNotFoundException(
                 "Android Emulator (emulator.exe) was not found in your Android SDK installation. " +
-                "Please verify your Android SDK location or install the Emulator component in Android Studio.");
+                "Please verify your Android SDK location or run the DroidBox Setup wizard.");
         }
 
-        // Ensure default AVD exists
+        // Ensure default AVDs exist
         AvdManager.EnsureDefaultAvdConfigured(SdkPathResolver.GetSdkRoot());
 
         _state = EmulatorState.Starting;
-        var avdName = AppConstants.DefaultAvdName;
+
+        // Choose available AVD: Tablet or Mobile
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var avdDir = Path.Combine(userProfile, ".android", "avd");
+        string avdName = SdkConstants.TabletDeviceName;
+
+        if (!File.Exists(Path.Combine(avdDir, $"{avdName}.ini")))
+        {
+            if (File.Exists(Path.Combine(avdDir, "DroidBox_Tablet.ini"))) avdName = "DroidBox_Tablet";
+            else if (File.Exists(Path.Combine(avdDir, $"{SdkConstants.MobileDeviceName}.ini"))) avdName = SdkConstants.MobileDeviceName;
+            else if (File.Exists(Path.Combine(avdDir, "DroidBox_Mobile.ini"))) avdName = "DroidBox_Mobile";
+        }
 
         var args = $"-avd {avdName} -no-boot-anim -gpu auto";
         if (WhpxDetector.IsWhpxAvailable())
@@ -54,9 +65,8 @@ public class EmulatorProcessManager : IAndroidRuntime
             FileName = emulatorPath,
             Arguments = args,
             UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
+            CreateNoWindow = false,
+            WorkingDirectory = Path.GetDirectoryName(emulatorPath) ?? string.Empty
         };
 
         try
@@ -64,15 +74,15 @@ public class EmulatorProcessManager : IAndroidRuntime
             _emulatorProcess = new Process { StartInfo = startInfo };
             _emulatorProcess.Start();
 
-            // Wait briefly for process to initialize
-            await Task.Delay(2000, cancellationToken);
+            // Wait briefly to verify process did not immediately crash
+            await Task.Delay(2500, cancellationToken);
 
             if (_emulatorProcess.HasExited)
             {
                 _state = EmulatorState.Error;
-                var err = await _emulatorProcess.StandardError.ReadToEndAsync(cancellationToken);
-                _logger.LogError("Emulator failed to start. Exit code: {Code}, Error: {Error}", _emulatorProcess.ExitCode, err);
-                throw new InvalidOperationException($"Emulator process exited prematurely: {err}");
+                var code = _emulatorProcess.ExitCode;
+                _logger.LogError("Emulator failed to start. Exit code: {Code}", code);
+                throw new InvalidOperationException($"Emulator process exited prematurely with code {code}");
             }
 
             _state = EmulatorState.Running;
@@ -112,6 +122,6 @@ public class EmulatorProcessManager : IAndroidRuntime
 
     public Task<bool> IsRunningAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_state == EmulatorState.Running);
+        return Task.FromResult(_state == EmulatorState.Running && _emulatorProcess != null && !_emulatorProcess.HasExited);
     }
 }

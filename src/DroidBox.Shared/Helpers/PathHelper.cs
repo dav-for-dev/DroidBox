@@ -3,6 +3,17 @@ namespace DroidBox.Shared.Helpers;
 public static class PathHelper
 {
     private static readonly string LocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    private static string? _customSdkDir;
+
+    public static void SetCustomSdkDirectory(string? path)
+    {
+        _customSdkDir = path;
+    }
+
+    public static string GetDefaultRecommendedSdkDirectory()
+    {
+        return Path.Combine(LocalAppData, "DroidBox", "AndroidSdk");
+    }
 
     public static string GetDataDirectory()
     {
@@ -13,6 +24,11 @@ public static class PathHelper
 
     public static string GetSdkDirectory()
     {
+        if (!string.IsNullOrWhiteSpace(_customSdkDir) && Directory.Exists(_customSdkDir))
+        {
+            return _customSdkDir;
+        }
+
         var envHome = Environment.GetEnvironmentVariable("ANDROID_HOME") 
                    ?? Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
 
@@ -21,24 +37,29 @@ public static class PathHelper
             return envHome;
         }
 
-        // 1. Standard Android Studio default location on Windows
+        // 1. DroidBox recommended directory if it exists
+        var droidBoxSdk = GetDefaultRecommendedSdkDirectory();
+        if (Directory.Exists(droidBoxSdk))
+        {
+            return droidBoxSdk;
+        }
+
+        // 2. Standard Android Studio default location on Windows
         var standardLocalSdk = Path.Combine(LocalAppData, "Android", "Sdk");
         if (Directory.Exists(standardLocalSdk))
         {
             return standardLocalSdk;
         }
 
-        // 2. Program Files location
+        // 3. Program Files location
         var progFilesSdk = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Android", "android-sdk");
         if (Directory.Exists(progFilesSdk))
         {
             return progFilesSdk;
         }
 
-        // 3. Fallback to DroidBox internal SDK dir
-        var path = Path.Combine(GetDataDirectory(), "android-sdk");
-        EnsureDirectoryExists(path);
-        return path;
+        // 4. Return default DroidBox recommended directory
+        return droidBoxSdk;
     }
 
     public static string GetAvdDirectory()
@@ -60,22 +81,17 @@ public static class PathHelper
         return Path.Combine(GetDataDirectory(), "droidbox.db");
     }
 
-    public static string GetDownloadsDirectory()
+    public static string GetScreenshotsDirectory()
     {
-        var path = Path.Combine(GetDataDirectory(), "downloads");
+        var path = Path.Combine(GetDataDirectory(), "screenshots");
         EnsureDirectoryExists(path);
         return path;
     }
 
     public static string GetDocsDirectory()
     {
-        var appDir = AppDomain.CurrentDomain.BaseDirectory;
-        var path = Path.Combine(appDir, "docs");
-        if (!Directory.Exists(path))
-        {
-            path = Path.Combine(GetDataDirectory(), "docs");
-            EnsureDirectoryExists(path);
-        }
+        var path = Path.Combine(GetDataDirectory(), "docs");
+        EnsureDirectoryExists(path);
         return path;
     }
 

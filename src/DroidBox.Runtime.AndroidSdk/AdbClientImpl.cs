@@ -38,6 +38,17 @@ public class AdbClientImpl : IAdbClient
     {
         try
         {
+            // Wait up to 60 seconds for device if not immediately ready
+            if (!await IsConnectedAsync(cancellationToken))
+            {
+                _logger.LogInformation("Waiting for Android emulator to finish booting and become ready...");
+                var ready = await WaitForDeviceReadyAsync(60, cancellationToken);
+                if (!ready)
+                {
+                    return OperationResult.Fail("No virtual Android device is ready. Please ensure the emulator is started and finished booting.");
+                }
+            }
+
             _logger.LogInformation("Executing adb install: {Path}", apkPath);
             var result = await ProcessHelper.RunProcessAsync(AdbPath, $"install -r \"{apkPath}\"", timeoutMs: 120000, cancellationToken: cancellationToken);
 
@@ -65,10 +76,10 @@ public class AdbClientImpl : IAdbClient
 
             if (result.Success && result.StandardOutput.Contains("Success"))
             {
-                return OperationResult.Ok("Package uninstalled successfully");
+                return OperationResult.Ok("Application uninstalled successfully");
             }
 
-            return OperationResult.Fail($"ADB uninstall failed: {result.StandardError.Trim()}");
+            return OperationResult.Fail($"ADB uninstall failed: {result.StandardError}");
         }
         catch (Exception ex)
         {
@@ -84,11 +95,16 @@ public class AdbClientImpl : IAdbClient
             var result = await ProcessHelper.RunProcessAsync(AdbPath, "shell pm list packages -3", cancellationToken: cancellationToken);
             if (!result.Success) return Array.Empty<string>();
 
-            return result.StandardOutput
-                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                .Where(line => line.StartsWith("package:"))
-                .Select(line => line.Substring("package:".Length).Trim())
-                .ToList();
+            var packages = new List<string>();
+            var lines = result.StandardOutput.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("package:"))
+                {
+                    packages.Add(line.Substring(8).Trim());
+                }
+            }
+            return packages;
         }
         catch (Exception ex)
         {
@@ -101,20 +117,22 @@ public class AdbClientImpl : IAdbClient
     {
         try
         {
-            string args;
-            if (!string.IsNullOrWhiteSpace(activity))
+            string cmd;
+            if (string.IsNullOrWhiteSpace(activity))
             {
-                args = $"shell am start -n {packageName}/{activity}";
+                cmd = $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1";
             }
             else
             {
-                args = $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1";
+                cmd = $"shell am start -n {packageName}/{activity}";
             }
 
-            var result = await ProcessHelper.RunProcessAsync(AdbPath, args, cancellationToken: cancellationToken);
+            _logger.LogInformation("Launching app: {Cmd}", cmd);
+            var result = await ProcessHelper.RunProcessAsync(AdbPath, cmd, cancellationToken: cancellationToken);
+
             if (result.Success)
             {
-                return OperationResult.Ok($"Launched {packageName}");
+                return OperationResult.Ok("Application launched successfully");
             }
 
             return OperationResult.Fail($"Launch failed: {result.StandardError}");
@@ -145,5 +163,31 @@ public class AdbClientImpl : IAdbClient
         {
             return false;
         }
+    }
+
+    public async Task<bool> WaitForDeviceReadyAsync(int timeoutSeconds = 60, CancellationToken cancellationToken = default)
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        while (sw.Elapsed.TotalSeconds < timeoutSeconds && !cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                var result = await ProcessHelper.RunProcessAsync(AdbPath, "devices", timeoutMs: 3000, cancellationToken: cancellationToken);
+                if (result.Success && result.StandardOutput.Contains("\tdevice"))
+                {
+                    var bootRes = await ProcessHelper.RunProcessAsync(AdbPath, "shell getprop sys.boot_completed", timeoutMs: 3000, cancellationToken: cancellationToken);
+                    if (bootRes.Success && bootRes.StandardOutput.Trim().Contains("1"))
+                    {
+                        _isConnected = true;
+                        return true;
+                    }
+                }
+            }
+            catch { }
+
+            await Task.Delay(2000, cancellationToken);
+        }
+
+        return await IsConnectedAsync(cancellationToken);
     }
 }

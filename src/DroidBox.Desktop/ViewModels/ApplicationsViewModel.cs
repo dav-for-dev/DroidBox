@@ -10,6 +10,7 @@ namespace DroidBox.Desktop.ViewModels;
 public partial class ApplicationsViewModel : ObservableObject
 {
     private readonly IApkService _apkService;
+    private readonly IEmulatorService _emulatorService;
     private readonly IDialogService _dialogService;
 
     [ObservableProperty]
@@ -23,9 +24,13 @@ public partial class ApplicationsViewModel : ObservableObject
 
     public ObservableCollection<InstalledApp> Applications { get; } = new();
 
-    public ApplicationsViewModel(IApkService apkService, IDialogService dialogService)
+    public ApplicationsViewModel(
+        IApkService apkService,
+        IEmulatorService emulatorService,
+        IDialogService dialogService)
     {
         _apkService = apkService;
+        _emulatorService = emulatorService;
         _dialogService = dialogService;
         _ = RefreshAppsAsync();
     }
@@ -55,12 +60,36 @@ public partial class ApplicationsViewModel : ObservableObject
 
     public async Task InstallFromPathAsync(string apkPath)
     {
+        // 1. Auto-start emulator if not running
+        var isRunning = await _emulatorService.IsRunningAsync();
+        if (!isRunning)
+        {
+            StatusMessage = "Starting virtual Android emulator...";
+            var startResult = await _emulatorService.StartAsync();
+            if (!startResult.Success)
+            {
+                StatusMessage = $"Could not start emulator: {startResult.Message}";
+                return;
+            }
+            StatusMessage = "Waiting for virtual Android device to finish booting...";
+        }
+
+        // 2. Install APK
         StatusMessage = $"Installing {System.IO.Path.GetFileName(apkPath)}...";
         var result = await _apkService.InstallAsync(apkPath);
         StatusMessage = result.Message;
+
+        // 3. Auto-launch the app
         if (result.Success)
         {
             await RefreshAppsAsync();
+            var apkInfo = await _apkService.AnalyzeApkAsync(apkPath);
+            if (!string.IsNullOrWhiteSpace(apkInfo.PackageName))
+            {
+                StatusMessage = $"Launching {apkInfo.AppName}...";
+                await _apkService.LaunchAsync(apkInfo.PackageName);
+                StatusMessage = $"Successfully installed and launched {apkInfo.AppName}!";
+            }
         }
     }
 

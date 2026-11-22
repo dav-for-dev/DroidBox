@@ -17,10 +17,17 @@
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="Storage and Paths" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,12" />
-                    <TextBlock Text="Android SDK Directory:" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
-                    <TextBox Text="{Binding SdkDirectory, Mode=OneWay}" IsReadOnly="True" Margin="0,4,0,12" Padding="6" />
+                    <TextBlock Text="Android SDK Directory (Recommended: %LOCALAPPDATA%\DroidBox\AndroidSdk):" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
+                    <TextBox Text="{Binding SdkDirectory, Mode=TwoWay}" Margin="0,4,0,8" Padding="6" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Button Content="Save Custom SDK Path" Command="{Binding SaveCustomSdkDirectoryCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
+                        <Button Content="Reset to Recommended Default" Command="{Binding ResetToDefaultSdkDirectoryCommand}" Padding="10,6" />
+                    </StackPanel>
+
                     <TextBlock Text="User Data Directory:" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" />
-                    <TextBox Text="{Binding DataDirectory, Mode=OneWay}" IsReadOnly="True" Margin="0,4,0,0" Padding="6" />
+                    <TextBox Text="{Binding DataDirectory, Mode=OneWay}" IsReadOnly="True" Margin="0,4,0,8" Padding="6" />
+                    
+                    <TextBlock Text="{Binding SettingsStatusMessage}" Foreground="#005A9E" FontWeight="SemiBold" Margin="0,4,0,0" />
                 </StackPanel>
             </Border>
         </StackPanel>

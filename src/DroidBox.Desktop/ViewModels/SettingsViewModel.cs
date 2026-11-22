@@ -21,6 +21,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private int _ramMb = 2048;
 
+    [ObservableProperty]
+    private string _settingsStatusMessage = string.Empty;
+
     public SettingsViewModel(IThemeService themeService)
     {
         _themeService = themeService;
@@ -34,5 +37,24 @@ public partial class SettingsViewModel : ObservableObject
     {
         IsDarkTheme = !IsDarkTheme;
         _themeService.SetTheme(IsDarkTheme);
+    }
+
+    [RelayCommand]
+    public void ResetToDefaultSdkDirectory()
+    {
+        var defaultDir = PathHelper.GetDefaultRecommendedSdkDirectory();
+        PathHelper.SetCustomSdkDirectory(null);
+        SdkDirectory = defaultDir;
+        SettingsStatusMessage = "SDK path reset to default recommended directory.";
+    }
+
+    [RelayCommand]
+    public void SaveCustomSdkDirectory()
+    {
+        if (!string.IsNullOrWhiteSpace(SdkDirectory))
+        {
+            PathHelper.SetCustomSdkDirectory(SdkDirectory);
+            SettingsStatusMessage = "Custom SDK directory saved successfully.";
+        }
     }
 }

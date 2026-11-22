@@ -57,17 +57,17 @@ public class ApplicationServiceTests
     public async Task EmulatorService_StartAsync_ShouldCallRuntimeStart()
     {
         var runtimeMock = new Mock<IAndroidRuntime>();
+        var emulatorMgrMock = new Mock<IAndroidEmulatorManager>();
         var loggerMock = new Mock<ILogger<EmulatorService>>();
 
-        runtimeMock.Setup(r => r.StartAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        emulatorMgrMock.Setup(e => e.StartEmulatorAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(OperationResult.Ok("Emulator started successfully"));
 
-        var sut = new EmulatorService(runtimeMock.Object, loggerMock.Object);
+        var sut = new EmulatorService(runtimeMock.Object, emulatorMgrMock.Object, loggerMock.Object);
 
         var result = await sut.StartAsync("TestAvd");
 
         result.Success.Should().BeTrue();
         result.Message.Should().Contain("started successfully");
-        runtimeMock.Verify(r => r.StartAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -8,5 +8,5 @@ public static class AppConstants
     public const string PipeName = "DroidBox.Ipc.Pipe";
     public const int DefaultAdbPort = 5555;
     public const int DefaultEmulatorPort = 5554;
-    public const string DefaultAvdName = "DroidBox_Default";
+    public const string DefaultAvdName = "DroidBox_Tablet";
 }

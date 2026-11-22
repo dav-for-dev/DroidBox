@@ -14,9 +14,24 @@ public static class DependencyInjection
 
         services.AddSingleton<IAdbClient, AdbClientImpl>();
         services.AddSingleton<IApkAnalyzer, ApkAnalyzerImpl>();
-        services.AddSingleton<IDeviceProfileManager, AvdManager>();
+
+        // New Official Runtime Services
+        services.AddSingleton<IAndroidEnvironmentDetector, AndroidEnvironmentDetector>();
+        services.AddSingleton<IAndroidLicenseManager, AndroidLicenseManager>();
+        services.AddSingleton<ISystemImageManager, SystemImageManager>();
+
+        services.AddSingleton<AvdManager>();
+        services.AddSingleton<IAvdManager>(sp => sp.GetRequiredService<AvdManager>());
+        services.AddSingleton<IDeviceProfileManager>(sp => sp.GetRequiredService<AvdManager>());
+
+        services.AddSingleton<IAndroidEmulatorManager, AndroidEmulatorManager>();
+
+        services.AddSingleton<AndroidSdkInstaller>();
+        services.AddSingleton<IAndroidSdkInstaller>(sp => sp.GetRequiredService<AndroidSdkInstaller>());
+        services.AddSingleton<IRuntimeInstaller>(sp => sp.GetRequiredService<AndroidSdkInstaller>());
+
+        services.AddSingleton<IAndroidSdkManager, AndroidSdkManager>();
         services.AddSingleton<IAndroidRuntime, EmulatorProcessManager>();
-        services.AddSingleton<IRuntimeInstaller, SdkInstaller>();
 
         return services;
     }

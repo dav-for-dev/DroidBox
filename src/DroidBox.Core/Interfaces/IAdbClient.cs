@@ -11,4 +11,5 @@ public interface IAdbClient
     Task<OperationResult> LaunchActivityAsync(string packageName, string? activity = null, CancellationToken cancellationToken = default);
     Task<string> ExecuteCommandAsync(string command, CancellationToken cancellationToken = default);
     Task<bool> IsConnectedAsync(CancellationToken cancellationToken = default);
+    Task<bool> WaitForDeviceReadyAsync(int timeoutSeconds = 60, CancellationToken cancellationToken = default);
 }
