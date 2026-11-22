@@ -21,6 +21,21 @@ public static class PathHelper
             return envHome;
         }
 
+        // 1. Standard Android Studio default location on Windows
+        var standardLocalSdk = Path.Combine(LocalAppData, "Android", "Sdk");
+        if (Directory.Exists(standardLocalSdk))
+        {
+            return standardLocalSdk;
+        }
+
+        // 2. Program Files location
+        var progFilesSdk = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Android", "android-sdk");
+        if (Directory.Exists(progFilesSdk))
+        {
+            return progFilesSdk;
+        }
+
+        // 3. Fallback to DroidBox internal SDK dir
         var path = Path.Combine(GetDataDirectory(), "android-sdk");
         EnsureDirectoryExists(path);
         return path;

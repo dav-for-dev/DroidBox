@@ -14,10 +14,10 @@ $rootDir = Split-Path -Parent $scriptDir
 $desktopOut = Join-Path $OutputDir "desktop"
 $cliOut = Join-Path $OutputDir "cli"
 
-Write-Host "Publishing Desktop application to: $desktopOut" -ForegroundColor Yellow
-dotnet publish "$rootDir\src\DroidBox.Desktop\DroidBox.Desktop.csproj" -c $Configuration -r win-x64 --self-contained false -o $desktopOut
+Write-Host "Publishing Desktop application (Self-Contained) to: $desktopOut" -ForegroundColor Yellow
+dotnet publish "$rootDir\src\DroidBox.Desktop\DroidBox.Desktop.csproj" -c $Configuration -r win-x64 --self-contained true -o $desktopOut
 
-Write-Host "Publishing CLI tool to: $cliOut" -ForegroundColor Yellow
-dotnet publish "$rootDir\src\DroidBox.Cli\DroidBox.Cli.csproj" -c $Configuration -r win-x64 --self-contained false -o $cliOut
+Write-Host "Publishing CLI tool (Self-Contained) to: $cliOut" -ForegroundColor Yellow
+dotnet publish "$rootDir\src\DroidBox.Cli\DroidBox.Cli.csproj" -c $Configuration -r win-x64 --self-contained true -o $cliOut
 
 Write-Host "Publishing complete!" -ForegroundColor Green

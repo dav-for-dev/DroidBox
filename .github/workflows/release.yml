@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version tag (e.g. v1.0.0)'
+        description: 'Release version tag (e.g. v1.0.1)'
         required: true
-        default: 'v1.0.0'
+        default: 'v1.0.1'
 
 jobs:
   release:
@@ -32,10 +32,10 @@ jobs:
     - name: Install Inno Setup
       run: choco install innosetup --no-progress
 
-    - name: Publish Desktop & CLI
+    - name: Publish Desktop & CLI (Self-Contained)
       run: |
-        dotnet publish src/DroidBox.Desktop/DroidBox.Desktop.csproj -c Release -r win-x64 --self-contained false -o publish/desktop
-        dotnet publish src/DroidBox.Cli/DroidBox.Cli.csproj -c Release -r win-x64 --self-contained false -o publish/cli
+        dotnet publish src/DroidBox.Desktop/DroidBox.Desktop.csproj -c Release -r win-x64 --self-contained true -o publish/desktop
+        dotnet publish src/DroidBox.Cli/DroidBox.Cli.csproj -c Release -r win-x64 --self-contained true -o publish/cli
 
     - name: Compile Inno Setup Installer
       run: |

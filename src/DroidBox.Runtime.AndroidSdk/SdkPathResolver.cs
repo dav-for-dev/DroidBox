@@ -12,17 +12,22 @@ public static class SdkPathResolver
         var adb = Path.Combine(sdk, "platform-tools", "adb.exe");
         if (File.Exists(adb)) return adb;
 
-        // Fallback to system PATH
+        var standardAdb = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Android", "Sdk", "platform-tools", "adb.exe");
+        if (File.Exists(standardAdb)) return standardAdb;
+
         return "adb";
     }
 
-    public static string GetEmulatorPath()
+    public static string? GetEmulatorPath()
     {
         var sdk = GetSdkRoot();
         var emu = Path.Combine(sdk, "emulator", "emulator.exe");
         if (File.Exists(emu)) return emu;
 
-        return "emulator";
+        var standardEmu = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Android", "Sdk", "emulator", "emulator.exe");
+        if (File.Exists(standardEmu)) return standardEmu;
+
+        return null;
     }
 
     public static string GetSdkManagerPath()
@@ -31,7 +36,6 @@ public static class SdkPathResolver
         var mgr = Path.Combine(sdk, "cmdline-tools", "latest", "bin", "sdkmanager.bat");
         if (File.Exists(mgr)) return mgr;
 
-        // Try any cmdline-tools version
         var cmdlineDir = Path.Combine(sdk, "cmdline-tools");
         if (Directory.Exists(cmdlineDir))
         {

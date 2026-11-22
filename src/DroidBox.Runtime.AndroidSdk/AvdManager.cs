@@ -50,39 +50,90 @@ public class AvdManager : IDeviceProfileManager
         {
             _activeProfile = DeviceProfile.CreateMobile();
         }
-
-        _logger.LogInformation("Switched active profile to: {Name}", _activeProfile.Name);
+        _logger.LogInformation("Switched to profile: {Name}", _activeProfile.Name);
         return Task.CompletedTask;
     }
 
     public Task<DeviceProfile?> GetActiveProfileAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<DeviceProfile?>(_activeProfile ?? DeviceProfile.CreateTablet());
+        _activeProfile ??= DeviceProfile.CreateTablet();
+        return Task.FromResult<DeviceProfile?>(_activeProfile);
     }
 
-    public async Task<OperationResult> CreateAvdAsync(string avdName, string systemImage, DeviceProfile profile, CancellationToken cancellationToken = default)
+    public async Task<OperationResult> CreateAvdAsync(string avdName, DeviceProfile profile, CancellationToken cancellationToken = default)
     {
+        var avdManager = SdkPathResolver.GetAvdManagerPath();
+        var systemImage = SdkConstants.DefaultSystemImage;
+
+        var args = $"create avd -n {avdName} -k \"{systemImage}\" --force";
+        _logger.LogInformation("Creating AVD: {Name} with image {Image}", avdName, systemImage);
+
         try
         {
-            var avdManagerPath = SdkPathResolver.GetAvdManagerPath();
-            var args = $"create avd -n \"{avdName}\" -k \"{systemImage}\" --force";
-
-            _logger.LogInformation("Creating AVD: {AvdName}", avdName);
-            var result = await ProcessHelper.RunProcessAsync(avdManagerPath, args, cancellationToken: cancellationToken);
-
+            var result = await ProcessHelper.RunProcessAsync(avdManager, args, cancellationToken: cancellationToken);
             if (result.Success)
             {
-                // Write hardware configuration for the profile
                 ConfigureAvdHardware(avdName, profile);
                 return OperationResult.Ok($"AVD {avdName} created successfully");
             }
-
             return OperationResult.Fail($"Failed to create AVD: {result.StandardError}");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to create AVD {AvdName}", avdName);
             return OperationResult.Fail($"Create AVD exception: {ex.Message}");
+        }
+    }
+
+    public static void EnsureDefaultAvdConfigured(string sdkRoot)
+    {
+        try
+        {
+            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var avdDir = Path.Combine(userProfile, ".android", "avd");
+            Directory.CreateDirectory(avdDir);
+
+            var iniFile = Path.Combine(avdDir, "DroidBox_Tablet.ini");
+            var boxAvdDir = Path.Combine(avdDir, "DroidBox_Tablet.avd");
+
+            if (!File.Exists(iniFile) || !Directory.Exists(boxAvdDir))
+            {
+                Directory.CreateDirectory(boxAvdDir);
+
+                var sysImgDir = Path.Combine(sdkRoot, "system-images");
+                string relImgPath = @"system-images\android-35\google_apis_playstore\x86_64\";
+                if (Directory.Exists(sysImgDir))
+                {
+                    var sysImg = Directory.GetDirectories(sysImgDir, "x86_64", SearchOption.AllDirectories).FirstOrDefault();
+                    if (sysImg != null)
+                    {
+                        relImgPath = Path.GetRelativePath(sdkRoot, sysImg) + "\\";
+                    }
+                }
+
+                File.WriteAllText(iniFile, $"avd.ini.encoding=UTF-8\npath={boxAvdDir}\npath.rel=avd/DroidBox_Tablet.avd\ntarget=android-35\n");
+                File.WriteAllText(Path.Combine(boxAvdDir, "config.ini"),
+                    "PlayStore.enabled=true\n" +
+                    "abi.type=x86_64\n" +
+                    "avd.ini.encoding=UTF-8\n" +
+                    "disk.dataPartition.size=4096M\n" +
+                    "hw.cpu.arch=x86_64\n" +
+                    "hw.gpu.enabled=yes\n" +
+                    "hw.gpu.mode=auto\n" +
+                    "hw.initialOrientation=landscape\n" +
+                    "hw.keyboard=yes\n" +
+                    "hw.lcd.density=213\n" +
+                    "hw.lcd.height=800\n" +
+                    "hw.lcd.width=1280\n" +
+                    "hw.ramSize=2048\n" +
+                    $"image.sysdir.1={relImgPath}\n" +
+                    "tag.display=Google Play\n" +
+                    "tag.id=google_apis_playstore\n");
+            }
+        }
+        catch
+        {
+            // Best effort configuration
         }
     }
 
