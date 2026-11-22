@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DroidBox.Core/DroidBox.Core.csproj" />
+    <Project Path="src/DroidBox.Shared/DroidBox.Shared.csproj" />
+    <Project Path="src/DroidBox.Application/DroidBox.Application.csproj" />
+    <Project Path="src/DroidBox.Infrastructure/DroidBox.Infrastructure.csproj" />
+    <Project Path="src/DroidBox.Display/DroidBox.Display.csproj" />
+    <Project Path="src/DroidBox.Runtime.AndroidSdk/DroidBox.Runtime.AndroidSdk.csproj" />
+    <Project Path="src/DroidBox.Runtime.Qemu/DroidBox.Runtime.Qemu.csproj" />
+    <Project Path="src/DroidBox.Cli/DroidBox.Cli.csproj" />
+    <Project Path="src/DroidBox.Bootstrapper/DroidBox.Bootstrapper.csproj" />
+    <Project Path="src/DroidBox.Desktop/DroidBox.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DroidBox.Core.Tests/DroidBox.Core.Tests.csproj" />
+    <Project Path="tests/DroidBox.Application.Tests/DroidBox.Application.Tests.csproj" />
+    <Project Path="tests/DroidBox.Infrastructure.Tests/DroidBox.Infrastructure.Tests.csproj" />
+    <Project Path="tests/DroidBox.Cli.Tests/DroidBox.Cli.Tests.csproj" />
+    <Project Path="tests/DroidBox.Integration.Tests/DroidBox.Integration.Tests.csproj" />
+  </Folder>
+</Solution>

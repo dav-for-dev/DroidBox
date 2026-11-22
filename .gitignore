@@ -1,0 +1,115 @@
+# ==============================================================================
+# DroidBox .gitignore
+# ==============================================================================
+
+# Build results and binaries
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+**/[Dd]ebug/
+**/[Rr]elease/
+x64/
+x86/
+arm/
+arm64/
+bld/
+[Bb]uild/
+artifacts/
+publish/
+release/
+dist/
+
+# .NET / CLI Local Environment & Tooling
+.dotnet_home/
+.nuget_packages/
+.nuget/
+packages/
+**/packages/
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+# Visual Studio & IDEs
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.VisualState.xml
+GeneratedInternalTypeHelper.g.cs
+*_wpftmp.*
+*_wpftmp.csproj
+
+# ReSharper / JetBrains / Rider
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+*.sln.iml
+
+# Testing and Code Coverage
+TestResults/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+*.dotCover
+
+# SQLite / Local Databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs & Diagnostics
+*.log
+*.tlog
+[Ll]ogs/
+[Ll]og/
+
+# Android & Emulator Runtime Data
+*.apk
+*.aab
+*.avd/
+.android/
+captures/
+recordings/
+screenshots/
+
+# Python (SDK / samples)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary & Swap Files
+*.swp
+*.*~
+*.tmp
+*.bak

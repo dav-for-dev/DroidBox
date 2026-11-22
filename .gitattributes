@@ -1,0 +1,31 @@
+###############################################################################
+# Set default behavior to automatically normalize line endings.
+###############################################################################
+* text=auto
+
+###############################################################################
+# Set default behavior for command prompt diff.
+###############################################################################
+*.cs     text diff=csharp
+*.csx    text diff=csharp
+*.sln    text eol=crlf
+*.csproj text
+
+###############################################################################
+# Set binary files
+###############################################################################
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.bmp   binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.7z    binary
+*.dll   binary
+*.exe   binary
+*.pdb   binary
+*.snk   binary
+*.pfx   binary

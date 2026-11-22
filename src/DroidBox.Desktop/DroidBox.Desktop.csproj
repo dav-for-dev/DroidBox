@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DroidBox.Core\DroidBox.Core.csproj" />
+    <ProjectReference Include="..\DroidBox.Shared\DroidBox.Shared.csproj" />
+    <ProjectReference Include="..\DroidBox.Application\DroidBox.Application.csproj" />
+    <ProjectReference Include="..\DroidBox.Infrastructure\DroidBox.Infrastructure.csproj" />
+    <ProjectReference Include="..\DroidBox.Display\DroidBox.Display.csproj" />
+    <ProjectReference Include="..\DroidBox.Runtime.AndroidSdk\DroidBox.Runtime.AndroidSdk.csproj" />
+    <ProjectReference Include="..\DroidBox.Runtime.Qemu\DroidBox.Runtime.Qemu.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+</Project>

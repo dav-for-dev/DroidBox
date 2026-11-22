@@ -1,0 +1,66 @@
+<UserControl x:Class="DroidBox.Desktop.Views.ApplicationsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             AllowDrop="True"
+             Drop="ApplicationsView_Drop"
+             DragOver="ApplicationsView_DragOver">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title & Action Bar -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="APK Application Manager" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Install APK" Command="{Binding InstallApkCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
+                <Button Content="Refresh" Command="{Binding RefreshAppsCommand}" Padding="12,6" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Drag and drop zone -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Background="#F8F9FA" BorderBrush="{DynamicResource AccentColor}" BorderThickness="1" Margin="0,0,0,16" Padding="20">
+            <TextBlock Text="Drag and Drop APK files here to install directly into the emulator" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold" />
+        </Border>
+
+        <!-- Applications DataGrid -->
+        <Border Grid.Row="2" Style="{StaticResource Card}">
+            <DataGrid ItemsSource="{Binding Applications}"
+                      SelectedItem="{Binding SelectedApp}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      Background="Transparent"
+                      BorderThickness="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Application Name" Binding="{Binding AppName}" Width="2*" />
+                    <DataGridTextColumn Header="Package Name" Binding="{Binding PackageName}" Width="3*" />
+                    <DataGridTextColumn Header="Version" Binding="{Binding VersionName}" Width="*" />
+                    <DataGridTextColumn Header="Target SDK" Binding="{Binding TargetSdk}" Width="*" />
+                    <DataGridTextColumn Header="Architecture" Binding="{Binding CpuArchitecture}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Bottom Action Bar for selected app -->
+        <Grid Grid.Row="3" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Launch Application" Command="{Binding LaunchSelectedAppCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
+                <Button Content="Uninstall" Command="{Binding UninstallSelectedAppCommand}" Padding="12,6" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

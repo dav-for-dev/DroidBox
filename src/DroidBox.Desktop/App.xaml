@@ -1,0 +1,30 @@
+<Application x:Class="DroidBox.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DroidBox.Desktop.ViewModels"
+             xmlns:views="clr-namespace:DroidBox.Desktop.Views">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/LightTheme.xaml" />
+                <ResourceDictionary Source="Themes/SharedStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                <views:DashboardView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ApplicationsViewModel}">
+                <views:ApplicationsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:EmulatorViewModel}">
+                <views:EmulatorView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DocumentationViewModel}">
+                <views:DocumentationView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                <views:SettingsView />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

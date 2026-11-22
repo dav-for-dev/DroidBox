@@ -1,0 +1,46 @@
+<UserControl x:Class="DroidBox.Desktop.Views.DocumentationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Offline Documentation" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+            <TextBlock Text="Browse local guides, CLI manuals, and integration tutorials without internet access." 
+                       FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
+            <Button Content="Open Docs in Browser" Command="{Binding OpenOfflineDocsCommand}" Padding="15,6" Margin="0,0,10,0" Style="{StaticResource PrimaryButton}"/>
+            <Button Content="CLI Reference" Command="{Binding OpenCliReferenceCommand}" Padding="15,6" Margin="0,0,10,0" Style="{StaticResource PrimaryButton}"/>
+            <Button Content="Flutter &amp; React Native" Command="{Binding OpenFrameworkGuideCommand}" Padding="15,6" Style="{StaticResource PrimaryButton}"/>
+        </StackPanel>
+
+        <Border Grid.Row="2" Background="{DynamicResource CardBackground}" BorderBrush="{DynamicResource BorderBrushColor}" BorderThickness="1" CornerRadius="8" Padding="20">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Quick Start Guide" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                    <TextBlock Text="1. Launch an emulator instance from the Dashboard or Emulators view." Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,5"/>
+                    <TextBlock Text="2. Drag and drop any .apk file onto the DroidBox window to install." Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,5"/>
+                    <TextBlock Text="3. Use 'droidbox.exe' from any terminal for scripted testing and CI workflows." Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,5"/>
+                    <TextBlock Text="4. Check the 'System Health' panel to ensure WHPX hardware acceleration is active." Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Included Offline Guides" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource AccentColor}" Margin="0,0,0,10"/>
+                    <TextBlock Text="- Getting Started with DroidBox on Windows" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                    <TextBlock Text="- CLI Reference and Automation Guide" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                    <TextBlock Text="- Flutter, React Native, and Android Studio Integration" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                    <TextBlock Text="- Troubleshooting Hardware Acceleration and ADB" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                    <TextBlock Text="- Python SDK and Headless CI Testing" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
