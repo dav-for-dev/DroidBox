@@ -75,9 +75,12 @@ public class EmulatorProcessManager : IAndroidRuntime
             _emulatorProcess.Start();
 
             // Wait briefly to verify process did not immediately crash
-            await Task.Delay(2500, cancellationToken);
+            await Task.Delay(3000, cancellationToken);
 
-            if (_emulatorProcess.HasExited)
+            var isQemu = Process.GetProcessesByName("qemu-system-x86_64").Any() ||
+                         Process.GetProcessesByName("emulator").Any(p => !p.HasExited);
+
+            if (!isQemu && _emulatorProcess.HasExited && _emulatorProcess.ExitCode != 0)
             {
                 _state = EmulatorState.Error;
                 var code = _emulatorProcess.ExitCode;
@@ -86,7 +89,7 @@ public class EmulatorProcessManager : IAndroidRuntime
             }
 
             _state = EmulatorState.Running;
-            _logger.LogInformation("Emulator process started successfully (PID: {Pid})", _emulatorProcess.Id);
+            _logger.LogInformation("Emulator process started successfully");
         }
         catch (Exception ex)
         {
@@ -98,13 +101,13 @@ public class EmulatorProcessManager : IAndroidRuntime
 
     public Task StopAsync(CancellationToken cancellationToken = default)
     {
-        if (_emulatorProcess != null && !_emulatorProcess.HasExited)
+        foreach (var p in Process.GetProcessesByName("emulator"))
         {
-            _logger.LogInformation("Stopping emulator process (PID: {Pid})", _emulatorProcess.Id);
-            _state = EmulatorState.Stopping;
-            _emulatorProcess.Kill(entireProcessTree: true);
-            _emulatorProcess.Dispose();
-            _emulatorProcess = null;
+            try { p.Kill(entireProcessTree: true); } catch { }
+        }
+        foreach (var p in Process.GetProcessesByName("qemu-system-x86_64"))
+        {
+            try { p.Kill(entireProcessTree: true); } catch { }
         }
 
         _state = EmulatorState.Stopped;
@@ -113,15 +116,16 @@ public class EmulatorProcessManager : IAndroidRuntime
 
     public Task<EmulatorState> GetStateAsync(CancellationToken cancellationToken = default)
     {
-        if (_emulatorProcess == null || _emulatorProcess.HasExited)
-        {
-            _state = EmulatorState.Stopped;
-        }
+        var isQemu = Process.GetProcessesByName("qemu-system-x86_64").Any() ||
+                     Process.GetProcessesByName("emulator").Any(p => !p.HasExited);
+        _state = isQemu ? EmulatorState.Running : EmulatorState.Stopped;
         return Task.FromResult(_state);
     }
 
     public Task<bool> IsRunningAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_state == EmulatorState.Running && _emulatorProcess != null && !_emulatorProcess.HasExited);
+        var isQemu = Process.GetProcessesByName("qemu-system-x86_64").Any() ||
+                     Process.GetProcessesByName("emulator").Any(p => !p.HasExited);
+        return Task.FromResult(isQemu);
     }
 }

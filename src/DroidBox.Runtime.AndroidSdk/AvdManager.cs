@@ -99,6 +99,12 @@ public class AvdManager : IAvdManager, IDeviceProfileManager
 
         File.WriteAllText(iniFile, $"avd.ini.encoding=UTF-8\npath={boxAvdDir}\npath.rel=avd/{avdName}.avd\ntarget=android-34\n");
 
+        var quickbootFile = Path.Combine(boxAvdDir, "quickbootChoice.ini");
+        if (!File.Exists(quickbootFile))
+        {
+            File.WriteAllText(quickbootFile, "saveOnExit = false\n");
+        }
+
         var configIni = Path.Combine(boxAvdDir, "config.ini");
         var isPlayStore = relImgPath.Contains("playstore", StringComparison.OrdinalIgnoreCase);
 
