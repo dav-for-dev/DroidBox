@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DroidBox Documentation</title>
+    <style>
+        :root {
+            --bg: #1e1e2e;
+            --sidebar-bg: #181825;
+            --text: #cdd6f4;
+            --text-muted: #a6adc8;
+            --accent: #89b4fa;
+            --accent-hover: #b4befe;
+            --card: #313244;
+            --code-bg: #11111b;
+            --border: #45475a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+        aside {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        aside h2 { color: var(--accent); font-size: 20px; font-weight: 700; }
+        aside p { font-size: 12px; color: var(--text-muted); }
+        aside nav a {
+            display: block;
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+        aside nav a:hover, aside nav a.active {
+            background: var(--card);
+            color: var(--accent);
+        }
+        main {
+            margin-left: 280px;
+            padding: 40px 60px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        h1 { font-size: 32px; color: #fff; margin-bottom: 12px; }
+        h2 { font-size: 22px; color: var(--accent); margin: 32px 0 12px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        h3 { font-size: 18px; margin: 20px 0 8px 0; }
+        p { font-size: 15px; line-height: 1.6; color: var(--text); margin-bottom: 16px; }
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 14px;
+            color: #f38ba8;
+        }
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        pre code { background: none; padding: 0; color: #a6e3a1; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        ul { margin-left: 24px; margin-bottom: 16px; }
+        li { margin-bottom: 6px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <aside>
+        <div>
+            <h2>DroidBox Docs</h2>
+            <p>v1.0.0 | Offline Manual</p>
+        </div>
+        <nav>
+            <a href="#overview">Overview</a>
+            <a href="#getting-started">Getting Started</a>
+            <a href="#cli">CLI Reference</a>
+            <a href="#desktop">Desktop GUI</a>
+            <a href="#frameworks">Flutter & React Native</a>
+            <a href="#python">Python Automation</a>
+            <a href="#troubleshooting">Troubleshooting</a>
+        </nav>
+    </aside>
+
+    <main>
+        <section id="overview">
+            <h1>DroidBox Documentation</h1>
+            <p><strong>DroidBox</strong> is a lightweight, free, open-source Android application testing environment designed specifically for Windows developers. It lets you run, test, and debug Android APKs directly on Windows without requiring a physical device.</p>
+            <div class="card">
+                <h3>Core Principles</h3>
+                <ul>
+                    <li>100% Free and Open Source (Apache 2.0 License).</li>
+                    <li>No advertisements, telemetry, or mandatory user accounts.</li>
+                    <li>No background bloatware or persistent telemetry daemons.</li>
+                    <li>Native Windows WPF desktop UI and developer-first CLI.</li>
+                    <li>WHPX hardware acceleration for fast, smooth virtualization.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+            <p>To verify that your Windows machine has all required virtualization and SDK dependencies installed, run the DroidBox Doctor command:</p>
+            <pre><code>droidbox doctor</code></pre>
+            <p>Doctor checks your Windows Hypervisor Platform (WHPX), ADB binary, Android SDK tools, and emulator installations. If components are missing, run the automated provisioner:</p>
+            <pre><code>.\scripts\setup-runtime.ps1</code></pre>
+        </section>
+
+        <section id="cli">
+            <h2>CLI Reference</h2>
+            <p>DroidBox includes a standalone, command-line tool (<code>droidbox.exe</code>) designed for terminal power users, automation pipelines, and CI/CD agents:</p>
+            <ul>
+                <li><code>droidbox doctor</code> - Diagnose environment, virtualization, and SDK status.</li>
+                <li><code>droidbox devices</code> - List all pre-configured virtual device profiles (tablet, mobile).</li>
+                <li><code>droidbox install &lt;path-to-apk&gt;</code> - Install and verify an APK.</li>
+                <li><code>droidbox apps</code> - List all installed Android applications.</li>
+                <li><code>droidbox launch &lt;package-name&gt;</code> - Launch an app in the running emulator.</li>
+                <li><code>droidbox uninstall &lt;package-name&gt;</code> - Uninstall an application.</li>
+                <li><code>droidbox screenshot [--output &lt;path&gt;]</code> - Capture an emulator screenshot.</li>
+                <li><code>droidbox stop</code> - Safely shut down running emulator instances.</li>
+            </ul>
+        </section>
+
+        <section id="desktop">
+            <h2>Desktop Application</h2>
+            <p>The DroidBox Desktop GUI provides an intuitive native Windows interface with:</p>
+            <ul>
+                <li><strong>Dashboard</strong>: Real-time emulator status, device profile selector, and recently installed applications.</li>
+                <li><strong>APK Manager</strong>: Drag-and-drop installation for <code>.apk</code> packages, package inspection, and one-click uninstallation.</li>
+                <li><strong>Virtual Screen</strong>: Live streaming display with mouse and touch input forwarding.</li>
+                <li><strong>Settings</strong>: Dark/Light theme switching and SDK storage configuration.</li>
+            </ul>
+        </section>
+
+        <section id="frameworks">
+            <h2>Flutter & React Native Integration</h2>
+            <p>Because DroidBox runs the official Android ADB daemon on standard ADB ports (5554/5555), standard mobile development tools automatically detect it as an active Android device:</p>
+            <pre><code># Flutter
+flutter devices
+flutter run
+
+# React Native
+npx react-native run-android</code></pre>
+        </section>
+
+        <section id="python">
+            <h2>Python SDK Automation</h2>
+            <p>Automate end-to-end tests using the bundled Python SDK in <code>samples/python/droidbox.py</code>:</p>
+            <pre><code>from droidbox import DroidBox
+
+client = DroidBox()
+client.doctor()
+client.install("path/to/my-app.apk")
+client.launch("com.example.myapp")
+client.screenshot("test-result.png")</code></pre>
+        </section>
+
+        <section id="troubleshooting">
+            <h2>Troubleshooting</h2>
+            <h3>Hardware Acceleration (WHPX)</h3>
+            <p>Ensure Windows Hypervisor Platform is enabled in Windows Features:</p>
+            <pre><code>Enable-WindowsOptionalFeature -Online -FeatureName HypervisorPlatform</code></pre>
+            <h3>ADB Port Conflicts</h3>
+            <p>If ADB fails to connect, restart the ADB daemon:</p>
+            <pre><code>adb kill-server
+adb start-server</code></pre>
+        </section>
+    </main>
+</body>
+</html>

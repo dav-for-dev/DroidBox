@@ -48,6 +48,11 @@ public partial class App : System.Windows.Application
 
                 // Views
                 services.AddSingleton<MainWindow>();
+                services.AddTransient<DashboardView>();
+                services.AddTransient<ApplicationsView>();
+                services.AddTransient<EmulatorView>();
+                services.AddTransient<DocumentationView>();
+                services.AddTransient<SettingsView>();
             })
             .Build();
 

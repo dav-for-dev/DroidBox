@@ -16,6 +16,7 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IDialogService _dialogService;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusColor))]
     private EmulatorState _emulatorState = EmulatorState.Stopped;
 
     [ObservableProperty]
@@ -33,6 +34,15 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "Ready";
 
+    public string StatusColor => EmulatorState switch
+    {
+        EmulatorState.Running => "#107C41",
+        EmulatorState.Starting => "#FFB900",
+        EmulatorState.Stopping => "#FF8C00",
+        EmulatorState.Error => "#E81123",
+        _ => "#808080"
+    };
+
     public ObservableCollection<InstalledApp> RecentApps { get; } = new();
 
     public DashboardViewModel(
@@ -45,22 +55,7 @@ public partial class DashboardViewModel : ObservableObject
         _apkService = apkService;
         _deviceService = deviceService;
         _dialogService = dialogService;
-        LoadDashboardDataAsync();
-    }
-
-    public async void LoadDashboardDataAsync()
-    {
-        EmulatorState = await _emulatorService.GetStateAsync();
-        var profile = await _deviceService.GetActiveProfileAsync();
-        if (profile != null) ActiveProfileName = profile.DisplayName;
-
-        var apps = await _apkService.GetInstalledAppsAsync();
-        InstalledAppsCount = apps.Count;
-        RecentApps.Clear();
-        foreach (var app in apps.Take(5))
-        {
-            RecentApps.Add(app);
-        }
+        _ = LoadDashboardDataAsync();
     }
 
     [RelayCommand]
@@ -68,8 +63,11 @@ public partial class DashboardViewModel : ObservableObject
     {
         StatusMessage = "Starting emulator...";
         var result = await _emulatorService.StartAsync();
-        EmulatorState = await _emulatorService.GetStateAsync();
         StatusMessage = result.Message;
+        if (result.Success)
+        {
+            EmulatorState = EmulatorState.Running;
+        }
     }
 
     [RelayCommand]
@@ -77,20 +75,37 @@ public partial class DashboardViewModel : ObservableObject
     {
         StatusMessage = "Stopping emulator...";
         var result = await _emulatorService.StopAsync();
-        EmulatorState = await _emulatorService.GetStateAsync();
         StatusMessage = result.Message;
+        if (result.Success)
+        {
+            EmulatorState = EmulatorState.Stopped;
+        }
     }
 
     [RelayCommand]
     public async Task QuickInstallApkAsync()
     {
-        var path = _dialogService.OpenApkFileDialog();
-        if (!string.IsNullOrWhiteSpace(path))
+        var apkPath = _dialogService.OpenApkFileDialog();
+        if (!string.IsNullOrWhiteSpace(apkPath))
         {
-            StatusMessage = $"Installing {System.IO.Path.GetFileName(path)}...";
-            var result = await _apkService.InstallAsync(path);
+            StatusMessage = "Installing APK...";
+            var result = await _apkService.InstallAsync(apkPath);
             StatusMessage = result.Message;
-            LoadDashboardDataAsync();
+            if (result.Success)
+            {
+                await LoadDashboardDataAsync();
+            }
         }
+    }
+
+    private async Task LoadDashboardDataAsync()
+    {
+        var apps = await _apkService.GetInstalledAppsAsync();
+        RecentApps.Clear();
+        foreach (var app in apps.Take(5))
+        {
+            RecentApps.Add(app);
+        }
+        InstalledAppsCount = apps.Count;
     }
 }

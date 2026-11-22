@@ -1,0 +1,64 @@
+name: "Release Installer"
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  release:
+    name: Build & Publish Release Installer
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET 10 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Install Inno Setup
+      run: choco install innosetup --no-progress
+
+    - name: Publish Desktop & CLI
+      run: |
+        dotnet publish src/DroidBox.Desktop/DroidBox.Desktop.csproj -c Release -r win-x64 --self-contained false -o publish/desktop
+        dotnet publish src/DroidBox.Cli/DroidBox.Cli.csproj -c Release -r win-x64 --self-contained false -o publish/cli
+
+    - name: Compile Inno Setup Installer
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer/DroidBox.iss
+
+    - name: Package Portable ZIP & Compute Checksums
+      run: |
+        mkdir release -Force
+        Compress-Archive -Path publish\* -DestinationPath release/DroidBox-win-x64.zip -Force
+        $files = Get-ChildItem -Path release -File
+        $sums = foreach ($f in $files) {
+            $h = (Get-FileHash $f.FullName -Algorithm SHA256).Hash.ToLower()
+            "$h  $($f.Name)"
+        }
+        $sums | Set-Content -Path release/SHA256SUMS.txt -Encoding UTF8
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          release/*.exe
+          release/*.zip
+          release/SHA256SUMS.txt
+        generate_release_notes: true
+        draft: false
+        prerelease: false

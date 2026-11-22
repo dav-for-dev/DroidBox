@@ -1,0 +1,22 @@
+PackageIdentifier: dav-for-dev.DroidBox
+PackageVersion: 1.0.0
+PackageName: DroidBox
+Publisher: dav-for-dev
+License: Apache-2.0
+LicenseUrl: https://github.com/dav-for-dev/DroidBox/blob/main/LICENSE
+ShortDescription: Lightweight, free, open-source Android testing environment for Windows.
+Description: DroidBox is a developer-first Android testing environment for Windows. Run, test, and manage APKs without requiring a physical device.
+Moniker: droidbox
+Tags:
+  - android
+  - emulator
+  - testing
+  - adb
+  - developer-tools
+Installers:
+  - Architecture: x64
+    InstallerType: inno
+    InstallerUrl: https://github.com/dav-for-dev/DroidBox/releases/download/v1.0.0/DroidBox-Setup-v1.0.0.exe
+    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+ManifestType: singleton
+ManifestVersion: 1.6.0

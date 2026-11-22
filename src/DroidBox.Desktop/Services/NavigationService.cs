@@ -1,4 +1,7 @@
+using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using DroidBox.Desktop.ViewModels;
+using DroidBox.Desktop.Views;
 
 namespace DroidBox.Desktop.Services;
 
@@ -9,6 +12,15 @@ public class NavigationService : INavigationService
 
     public object? CurrentView => _currentView;
     public event EventHandler? CurrentViewChanged;
+
+    private readonly Dictionary<Type, Type> _viewMap = new()
+    {
+        { typeof(DashboardViewModel), typeof(DashboardView) },
+        { typeof(ApplicationsViewModel), typeof(ApplicationsView) },
+        { typeof(EmulatorViewModel), typeof(EmulatorView) },
+        { typeof(DocumentationViewModel), typeof(DocumentationView) },
+        { typeof(SettingsViewModel), typeof(SettingsView) }
+    };
 
     public NavigationService(IServiceProvider serviceProvider)
     {
@@ -22,8 +34,17 @@ public class NavigationService : INavigationService
 
     public void NavigateTo(Type viewModelType)
     {
-        var vm = _serviceProvider.GetRequiredService(viewModelType);
-        _currentView = vm;
+        if (_viewMap.TryGetValue(viewModelType, out var viewType))
+        {
+            var view = (UserControl)_serviceProvider.GetRequiredService(viewType);
+            var vm = _serviceProvider.GetRequiredService(viewModelType);
+            view.DataContext = vm;
+            _currentView = view;
+        }
+        else
+        {
+            _currentView = _serviceProvider.GetRequiredService(viewModelType);
+        }
         CurrentViewChanged?.Invoke(this, EventArgs.Empty);
     }
 }

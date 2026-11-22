@@ -27,7 +27,7 @@ public partial class ApplicationsViewModel : ObservableObject
     {
         _apkService = apkService;
         _dialogService = dialogService;
-        RefreshAppsAsync();
+        _ = RefreshAppsAsync();
     }
 
     [RelayCommand]
@@ -58,7 +58,10 @@ public partial class ApplicationsViewModel : ObservableObject
         StatusMessage = $"Installing {System.IO.Path.GetFileName(apkPath)}...";
         var result = await _apkService.InstallAsync(apkPath);
         StatusMessage = result.Message;
-        await RefreshAppsAsync();
+        if (result.Success)
+        {
+            await RefreshAppsAsync();
+        }
     }
 
     [RelayCommand]
@@ -66,8 +69,8 @@ public partial class ApplicationsViewModel : ObservableObject
     {
         if (SelectedApp == null) return;
         StatusMessage = $"Launching {SelectedApp.AppName}...";
-        var res = await _apkService.LaunchAsync(SelectedApp.PackageName);
-        StatusMessage = res.Message;
+        var result = await _apkService.LaunchAsync(SelectedApp.PackageName);
+        StatusMessage = result.Message;
     }
 
     [RelayCommand]
@@ -75,8 +78,11 @@ public partial class ApplicationsViewModel : ObservableObject
     {
         if (SelectedApp == null) return;
         StatusMessage = $"Uninstalling {SelectedApp.AppName}...";
-        var res = await _apkService.UninstallAsync(SelectedApp.PackageName);
-        StatusMessage = res.Message;
-        await RefreshAppsAsync();
+        var result = await _apkService.UninstallAsync(SelectedApp.PackageName);
+        StatusMessage = result.Message;
+        if (result.Success)
+        {
+            await RefreshAppsAsync();
+        }
     }
 }
