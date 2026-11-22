@@ -55,6 +55,7 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ github.ref_name != '' && github.ref_name || inputs.version }}
         files: |
           release/*.exe
           release/*.zip
